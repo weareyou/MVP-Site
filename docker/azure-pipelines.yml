@@ -17,7 +17,8 @@ variables:
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
   AZURE_CONTAINER_REGISTRY: 'Paas-to-AKS-acr'
 
-  dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache  
+  dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache
+  forcePush: true # can be set in pipeline variables later
   
 stages:
 - stage: Build
@@ -63,7 +64,7 @@ stages:
         action: 'Push services'
         additionalImageTags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
         includeLatestTag: true
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
 
     - task: CopyFiles@2
       displayName: "Copy K8s specifications to staging directory"
