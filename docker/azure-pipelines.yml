@@ -16,6 +16,8 @@ variables:
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
   AZURE_CONTAINER_REGISTRY: 'Paas-to-AKS-acr'
+
+  dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache  
   
 stages:
 - stage: Build
@@ -26,6 +28,18 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    - task: Cache@2
+      inputs:
+        key: 'docker | cache'
+        path: $(Pipeline.Workspace)/docker
+        cacheHitVar: DOCKER_CACHE_HIT
+      displayName: Cache Docker images
+
+    - script: |
+        docker load -i $(Pipeline.Workspace)/docker/cache.tar
+      displayName: Restore Docker image
+      condition: and(not(canceled()), eq(variables.DOCKER_CACHE_HIT, 'true'))
+
     - task: DockerCompose@0
       displayName: "Build Images"
       inputs:
@@ -37,6 +51,7 @@ stages:
         action: 'Build services'
         additionalImageTags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
         includeLatestTag: true
+        
     - task: DockerCompose@0
       displayName: "Push Images with Latest Tag"
       inputs:
@@ -49,6 +64,7 @@ stages:
         additionalImageTags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
         includeLatestTag: true
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
     - task: CopyFiles@2
       displayName: "Copy K8s specifications to staging directory"
       inputs:
@@ -56,6 +72,7 @@ stages:
         Contents: '**'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/k8s-specs'
         CleanTargetFolder: true
+
     - task: CopyFiles@2
       displayName: "Copy Serialisation assets to staging directory"
       inputs:
@@ -67,10 +84,17 @@ stages:
           .config/dotnet-tools.json
         TargetFolder: '$(Build.ArtifactStagingDirectory)/serialization'
         CleanTargetFolder: true
+
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(System.ArtifactsDirectory)'
         artifact: 'Sitecore.MVP-$(Build.BuildNumber)'
+
+    - script: |
+        mkdir -p $(Pipeline.Workspace)/docker
+        docker save -o $(Pipeline.Workspace)/docker/cache.tar cache
+      displayName: Save Docker image
+      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))        
 
 # - stage: Deploy
 #   condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
