@@ -15,7 +15,7 @@ variables:
   # Agent VM image name
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
-  AZURE_CONTAINER_REGISTRY: 'Paas-to-AKS-acr'
+  AZURE_CONTAINER_REGISTRY: 'paastoaksacr'
 
   dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache
   forcePush: true # can be set in pipeline variables later
