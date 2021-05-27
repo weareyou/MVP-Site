@@ -17,8 +17,8 @@ variables:
   # Agent VM image name
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
-  AZURE_CONTAINER_REGISTRY: 'paastoaksacr'
-  MVP_DOCKER_REGISTRY: $(AZURE_CONTAINER_REGISTRY)
+  AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azure.io'
+  #MVP_DOCKER_REGISTRY: $(AZURE_CONTAINER_REGISTRY)
 
   dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache
   tag: "$(Build.BuildNumber)"
@@ -50,9 +50,9 @@ stages:
       displayName: "Build Images"
       inputs:
         containerregistrytype: 'Azure Container Registry'
-        dockerRegistryEndpoint: '$(AZURE_CONTAINER_REGISTRY)'
-        dockerComposeFile: '**/docker-compose.yml'
-        additionalDockerComposeFiles: 'docker-compose.override.yml'        
+        azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+        dockerComposeFile: '**/docker-compose.azdevops.yml'
+        #additionalDockerComposeFiles: 'docker-compose.override.yml'        
         qualifyImageNames: false
         action: 'Build services'
         additionalImageTags: '$(tag)'
@@ -64,8 +64,8 @@ stages:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: '$(AZURE_SUBSCRIPTION)'
         azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-        dockerComposeFile: '**/docker-compose.yml'
-        additionalDockerComposeFiles: 'docker-compose.override.yml'
+        dockerComposeFile: '**/docker-compose.azdevops.yml'
+        #additionalDockerComposeFiles: 'docker-compose.override.yml'
         action: 'Push services'
         additionalImageTags: '$(tag)'
         includeLatestTag: true
