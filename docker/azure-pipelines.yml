@@ -50,6 +50,7 @@ stages:
       displayName: "Build Images"
       inputs:
         containerregistrytype: 'Azure Container Registry'
+        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
         azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
         dockerComposeFile: '**/docker-compose.azdevops.yml'
         #additionalDockerComposeFiles: 'docker-compose.override.yml'        
@@ -62,7 +63,7 @@ stages:
       displayName: "Push Images with Latest Tag"
       inputs:
         containerregistrytype: 'Azure Container Registry'
-        azureSubscription: '$(AZURE_SUBSCRIPTION)'
+        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
         azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
         dockerComposeFile: '**/docker-compose.azdevops.yml'
         #additionalDockerComposeFiles: 'docker-compose.override.yml'
