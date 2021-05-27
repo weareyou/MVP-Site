@@ -1,0 +1,12 @@
+version: "2.4"
+services:
+
+  dotnetsdk:
+    container_name: mvp-dotnetsdk
+    image: ${MVP_DOCKER_REGISTRY}mvp-dotnetsdk:${SITECORE_VERSION}
+    build:
+      context: ./docker/build/dotnetsdk
+      args:
+        BUILD_IMAGE: ${SOLUTION_BUILD_IMAGE}
+        NETCORE_BUILD_IMAGE: ${NETCORE_BUILD_IMAGE}
+    scale: 0
