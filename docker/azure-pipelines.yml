@@ -31,7 +31,7 @@ variables:
   CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm:${SITECORE_VERSION}'
   DEVEX_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/sitecore-management-services-xm1-assets:2.0.0-1809'
   JSS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/jss-xm1-assets:14.0.0-1809'
-  TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)/tools/sitecore-docker-tools-assets:10.1.0-1809'
+  TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)tools/sitecore-docker-tools-assets:10.1.0-1809'
   SOLUTION_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/framework/sdk:4.8'
   SOLUTION_BASE_IMAGE: 'mcr.microsoft.com/windows/nanoserver:1809'
   NETCORE_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/core/sdk:3.1'
@@ -68,14 +68,14 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          echo "$(IMAGE_LIST)"
+          echo "${{ parameters.cacheImages }}"
           pwd
           mkdir /d/a/1/docker
           ls /d/a/1/
 
           for fn in ${{ parameters.cacheImages }}
           do
-            docker pull -q $fn
+            docker pull $fn
           done
 
           docker image ls
