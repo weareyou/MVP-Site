@@ -23,6 +23,19 @@ variables:
   dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache
   tag: "$(Build.BuildNumber)"
 
+  #variables to pull and cache sitecore images, those are also defined in the .env file for docker-compose
+  SITECORE_DOCKER_REGISTRY: 'scr.sitecore.com/'
+  ID_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-id'
+  CD_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cd'
+  CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm'
+  DEVEX_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/sitecore-management-services-xm1-assets:2.0.0-1809'
+  JSS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/jss-xm1-assets:14.0.0-1809'
+  TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)/tools/sitecore-docker-tools-assets:10.1.0-1809'
+  SOLUTION_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/framework/sdk:4.8'
+  SOLUTION_BASE_IMAGE: 'mcr.microsoft.com/windows/nanoserver:1809'
+  NETCORE_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/core/sdk:3.1'
+
+  IMAGE_LIST: $(ID_IMAGE) $(CD_IMAGE) $(CM_IMAGE) $(DEVEX_IMAGE) $(JSS_RESOURCES_IMAGE) $(TOOLS_RESOURCES_IMAGE) $(SOLUTION_BUILD_IMAGE) $(SOLUTION_BASE_IMAGE) $(NETCORE_BUILD_IMAGE)
   forcePush: true # can be set in pipeline variables later
 
 stages:
@@ -45,6 +58,19 @@ stages:
         docker load -i $(Pipeline.Workspace)\docker\cache.tar
       displayName: Restore Docker image
       condition: and(not(canceled()), eq(variables.DOCKER_CACHE_HIT, 'true'))
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          mkdir -p $(Pipeline.Workspace)/docker
+          for fn in $(IMAGE_LIST)
+          do
+            docker pull -q $fn
+          done
+          docker save -o $(Pipeline.Workspace)\docker\cache.tar $(IMAGE_LIST)
+      displayName: Populate docker image cache
+      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))      
 
     - task: DockerCompose@0
       displayName: "Build Images"
@@ -101,7 +127,7 @@ stages:
         mkdir $(Pipeline.Workspace)\docker
         docker save -o $(Pipeline.Workspace)\docker\cache.tar cache
       displayName: Save Docker image
-      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))        
+      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))  
 
 # - stage: Deploy
 #   condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
