@@ -124,11 +124,11 @@ stages:
         targetPath: '$(System.ArtifactsDirectory)'
         artifact: 'Sitecore.MVP-$(Build.BuildNumber)'
 
-    - script: |
-        mkdir $(Pipeline.Workspace)\docker
-        docker save -o $(Pipeline.Workspace)\docker\cache.tar cache
-      displayName: Save Docker image
-      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))  
+    # - script: |
+    #     mkdir $(Pipeline.Workspace)\docker
+    #     docker save -o $(Pipeline.Workspace)\docker\cache.tar cache
+    #   displayName: Save Docker image
+    #   condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))  
 
 # - stage: Deploy
 #   condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
