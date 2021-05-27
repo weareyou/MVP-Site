@@ -25,9 +25,10 @@ variables:
 
   #variables to pull and cache sitecore images, those are also defined in the .env file for docker-compose
   SITECORE_DOCKER_REGISTRY: 'scr.sitecore.com/'
-  ID_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-id'
-  CD_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cd'
-  CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm'
+  SITECORE_VERSION: '10.1.0-ltsc2019'
+  ID_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-id:${SITECORE_VERSION}'
+  CD_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cd:${SITECORE_VERSION}'
+  CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm:${SITECORE_VERSION}'
   DEVEX_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/sitecore-management-services-xm1-assets:2.0.0-1809'
   JSS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/jss-xm1-assets:14.0.0-1809'
   TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)/tools/sitecore-docker-tools-assets:10.1.0-1809'
@@ -35,7 +36,7 @@ variables:
   SOLUTION_BASE_IMAGE: 'mcr.microsoft.com/windows/nanoserver:1809'
   NETCORE_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/core/sdk:3.1'
 
-  IMAGE_LIST: $(ID_IMAGE) $(CD_IMAGE) $(CM_IMAGE) $(DEVEX_IMAGE) $(JSS_RESOURCES_IMAGE) $(TOOLS_RESOURCES_IMAGE) $(SOLUTION_BUILD_IMAGE) $(SOLUTION_BASE_IMAGE) $(NETCORE_BUILD_IMAGE)
+  IMAGE_LIST: $(ID_IMAGE) $(CD_IMAGE) $(CM_IMAGE) $(DEVEX_RESOURCES_IMAGE) $(JSS_RESOURCES_IMAGE) $(TOOLS_RESOURCES_IMAGE) $(SOLUTION_BUILD_IMAGE) $(SOLUTION_BASE_IMAGE) $(NETCORE_BUILD_IMAGE)
   forcePush: true # can be set in pipeline variables later
 
 stages:
