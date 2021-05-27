@@ -8,5 +8,5 @@ services:
       context: ./docker/build/dotnetsdk
       args:
         BUILD_IMAGE: ${SOLUTION_BUILD_IMAGE}
-        NETCORE_BUILD_IMAGE: ${NETCORE_BUILD_IMAGE}
+        #NETCORE_BUILD_IMAGE: ${NETCORE_BUILD_IMAGE}
     scale: 0
