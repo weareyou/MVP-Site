@@ -64,11 +64,14 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          mkdir -p $(Pipeline.Workspace)/docker
+          pwd
+          mkdir $(Pipeline.Workspace)/docker
+          ls $(Pipeline.Workspace)
           for fn in $(IMAGE_LIST)
           do
             docker pull -q $fn
           done
+          docker image ls
           docker save -o $(Pipeline.Workspace)/docker/cache.tar $(IMAGE_LIST)
       displayName: Populate docker image cache
       condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))      
