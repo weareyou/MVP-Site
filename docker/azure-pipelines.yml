@@ -24,24 +24,24 @@ variables:
   tag: "$(Build.BuildNumber)"
 
   #variables to pull and cache sitecore images, those are also defined in the .env file for docker-compose
-  SITECORE_DOCKER_REGISTRY: 'scr.sitecore.com/'
-  SITECORE_VERSION: '10.1.0-ltsc2019'
-  ID_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-id:${SITECORE_VERSION}'
-  CD_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cd:${SITECORE_VERSION}'
-  CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm:${SITECORE_VERSION}'
-  DEVEX_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/sitecore-management-services-xm1-assets:2.0.0-1809'
-  JSS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/jss-xm1-assets:14.0.0-1809'
-  TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)tools/sitecore-docker-tools-assets:10.1.0-1809'
-  SOLUTION_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/framework/sdk:4.8'
-  SOLUTION_BASE_IMAGE: 'mcr.microsoft.com/windows/nanoserver:1809'
-  NETCORE_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/core/sdk:3.1'
+  # SITECORE_DOCKER_REGISTRY: 'scr.sitecore.com/'
+  # SITECORE_VERSION: '10.1.0-ltsc2019'
+  # ID_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-id:${SITECORE_VERSION}'
+  # CD_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cd:${SITECORE_VERSION}'
+  # CM_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/sitecore-xm1-cm:${SITECORE_VERSION}'
+  # DEVEX_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/sitecore-management-services-xm1-assets:2.0.0-1809'
+  # JSS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)sxp/modules/jss-xm1-assets:14.0.0-1809'
+  # TOOLS_RESOURCES_IMAGE: '$(SITECORE_DOCKER_REGISTRY)tools/sitecore-docker-tools-assets:10.1.0-1809'
+  # SOLUTION_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/framework/sdk:4.8'
+  # SOLUTION_BASE_IMAGE: 'mcr.microsoft.com/windows/nanoserver:1809'
+  # NETCORE_BUILD_IMAGE: 'mcr.microsoft.com/dotnet/core/sdk:3.1'
 
   forcePush: true # can be set in pipeline variables later
 
-parameters:
-  - name: cacheImages
-    type: string
-    default: $(ID_IMAGE) $(CD_IMAGE) $(CM_IMAGE) $(DEVEX_RESOURCES_IMAGE) $(JSS_RESOURCES_IMAGE) $(TOOLS_RESOURCES_IMAGE) $(SOLUTION_BUILD_IMAGE) $(SOLUTION_BASE_IMAGE) $(NETCORE_BUILD_IMAGE)
+# parameters:
+#   - name: cacheImages
+#     type: string
+#     default: $(ID_IMAGE) $(CD_IMAGE) $(CM_IMAGE) $(DEVEX_RESOURCES_IMAGE) $(JSS_RESOURCES_IMAGE) $(TOOLS_RESOURCES_IMAGE) $(SOLUTION_BUILD_IMAGE) $(SOLUTION_BASE_IMAGE) $(NETCORE_BUILD_IMAGE)
 
 stages:
 - stage: Build
@@ -52,36 +52,36 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Cache@2
-      inputs:
-        key: 'docker | cache'
-        path: $(Pipeline.Workspace)/docker
-        cacheHitVar: DOCKER_CACHE_HIT
-      displayName: Cache Docker images
+    # - task: Cache@2
+    #   inputs:
+    #     key: 'docker | cache'
+    #     path: $(Pipeline.Workspace)/docker
+    #     cacheHitVar: DOCKER_CACHE_HIT
+    #   displayName: Cache Docker images
 
-    - script: |
-        docker load -i $(Pipeline.Workspace)\docker\cache.tar
-      displayName: Restore Docker image
-      condition: and(not(canceled()), eq(variables.DOCKER_CACHE_HIT, 'true'))
+    # - script: |
+    #     docker load -i $(Pipeline.Workspace)\docker\cache.tar
+    #   displayName: Restore Docker image
+    #   condition: and(not(canceled()), eq(variables.DOCKER_CACHE_HIT, 'true'))
 
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "${{ parameters.cacheImages }}"
-          pwd
-          mkdir /d/a/1/docker
-          ls /d/a/1/
+    # - task: Bash@3
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       echo "${{ parameters.cacheImages }}"
+    #       pwd
+    #       mkdir /d/a/1/docker
+    #       ls /d/a/1/
 
-          for fn in ${{ parameters.cacheImages }}
-          do
-            docker pull $fn
-          done
+    #       for fn in ${{ parameters.cacheImages }}
+    #       do
+    #         docker pull $fn
+    #       done
 
-          docker image ls
-          docker save -o /d/a/1/docker/cache.tar ${{ parameters.cacheImages }}
-      displayName: Populate docker image cache
-      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))      
+    #       docker image ls
+    #       docker save -o /d/a/1/docker/cache.tar ${{ parameters.cacheImages }}
+    #   displayName: Populate docker image cache
+    #   condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))      
 
     - task: DockerCompose@0
       displayName: "Build Images"
