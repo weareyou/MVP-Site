@@ -69,7 +69,7 @@ stages:
           do
             docker pull -q $fn
           done
-          docker save -o $(Pipeline.Workspace)\docker\cache.tar $(IMAGE_LIST)
+          docker save -o $(Pipeline.Workspace)/docker/cache.tar $(IMAGE_LIST)
       displayName: Populate docker image cache
       condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))      
 
