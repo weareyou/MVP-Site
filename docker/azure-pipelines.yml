@@ -1,6 +1,8 @@
 # Docker
 # Build and push an image to Azure Container Registry
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+name: 0.1$(Rev:.r)
+
 
 trigger:
   branches:
@@ -15,11 +17,13 @@ variables:
   # Agent VM image name
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
-  AZURE_CONTAINER_REGISTRY: 'paastoaksacr'
+  AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azurecr.io'
 
   dockerCache: $(Build.ArtifactStagingDirectory)\.dockercache
+  tag: "$(Build.BuildNumber)"
+
   forcePush: true # can be set in pipeline variables later
-  
+
 stages:
 - stage: Build
   displayName: Build Images + Push to ACR
@@ -44,13 +48,13 @@ stages:
     - task: DockerCompose@0
       displayName: "Build Images"
       inputs:
-        containerregistrytype: 'Container Registry'
+        containerregistrytype: 'Azure Container Registry'
         dockerRegistryEndpoint: '$(AZURE_CONTAINER_REGISTRY)'
         dockerComposeFile: '**/docker-compose.yml'
         additionalDockerComposeFiles: 'docker-compose.override.yml'        
         qualifyImageNames: false
         action: 'Build services'
-        additionalImageTags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
+        additionalImageTags: '$(tag)'
         includeLatestTag: true
 
     - task: DockerCompose@0
@@ -62,7 +66,7 @@ stages:
         dockerComposeFile: '**/docker-compose.yml'
         additionalDockerComposeFiles: 'docker-compose.override.yml'
         action: 'Push services'
-        additionalImageTags: '$(Build.BuildNumber)-$(Build.SourceBranchName)'
+        additionalImageTags: '$(tag)'
         includeLatestTag: true
       condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
 
@@ -210,7 +214,7 @@ stages:
 #               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
 #               namespace: 'mvp-staging'
 #               command: 'set'
-#               arguments: 'image deployments/mssql mssql=$(ACR_ENDPOINT)/mvp-mssql:$(Build.BuildNumber)-$(Build.SourceBranchName)'
+#               arguments: 'image deployments/mssql mssql=$(ACR_ENDPOINT)/mvp-mssql:$(tag)'
 #               secretType: 'dockerRegistry'
 #               containerRegistryType: 'Azure Container Registry'
 #               outputFormat: ''
@@ -221,7 +225,7 @@ stages:
 #               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
 #               namespace: 'mvp-staging'
 #               command: 'set'
-#               arguments: 'image deployments/mvp-id sitecore-xm1-id=$(ACR_ENDPOINT)/mvp-id:$(Build.BuildNumber)-$(Build.SourceBranchName)'
+#               arguments: 'image deployments/mvp-id sitecore-xm1-id=$(ACR_ENDPOINT)/mvp-id:$(tag)'
 #               secretType: 'dockerRegistry'
 #               containerRegistryType: 'Azure Container Registry'
 #               outputFormat: ''
@@ -232,7 +236,7 @@ stages:
 #               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
 #               namespace: 'mvp-staging'
 #               command: 'set'
-#               arguments: 'image deployments/mvp-cm sitecore-xm1-cm=$(ACR_ENDPOINT)/mvp-cm:$(Build.BuildNumber)-$(Build.SourceBranchName)'
+#               arguments: 'image deployments/mvp-cm sitecore-xm1-cm=$(ACR_ENDPOINT)/mvp-cm:$(tag)'
 #               secretType: 'dockerRegistry'
 #               containerRegistryType: 'Azure Container Registry'
 #               outputFormat: ''
@@ -243,7 +247,7 @@ stages:
 #               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
 #               namespace: 'mvp-staging'
 #               command: 'set'
-#               arguments: 'image deployments/mvp-cd sitecore-xm1-cd=$(ACR_ENDPOINT)/mvp-cd:$(Build.BuildNumber)-$(Build.SourceBranchName)'
+#               arguments: 'image deployments/mvp-cd sitecore-xm1-cd=$(ACR_ENDPOINT)/mvp-cd:$(tag)'
 #               secretType: 'dockerRegistry'
 #               containerRegistryType: 'Azure Container Registry'
 #               outputFormat: ''
@@ -254,7 +258,7 @@ stages:
 #               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
 #               namespace: 'mvp-staging'
 #               command: 'set'
-#               arguments: 'image deployments/mvp-rendering sitecore-xm1-rendering=$(ACR_ENDPOINT)/mvp-rendering:$(Build.BuildNumber)-$(Build.SourceBranchName)'
+#               arguments: 'image deployments/mvp-rendering sitecore-xm1-rendering=$(ACR_ENDPOINT)/mvp-rendering:$(tag)'
 #               secretType: 'dockerRegistry'
 #               containerRegistryType: 'Azure Container Registry'
 #               outputFormat: ''
