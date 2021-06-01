@@ -25,6 +25,7 @@ WORKDIR /build
 COPY --from=nuget-prep ./nuget ./
 
 # Restore NuGet packages
+RUN nuget restore
 RUN dotnet restore
 
 # Copy remaining source code
@@ -33,6 +34,9 @@ COPY src/ ./src/
 # Publish the Sitecore & Identity Artifacts
 RUN msbuild .\src\Environment\sitecore\Mvp.Environment.Sitecore.csproj /p:Configuration=Release /restore /m /p:DeployOnBuild=true /p:PublishProfile=Local
 RUN msbuild .\src\Environment\identity\Mvp.Environment.Identity.csproj /p:Configuration=Release /restore /m /p:DeployOnBuild=true /p:PublishProfile=Local
+
+# Build XConnect with file publish
+#RUN msbuild .\src\DockerExamples.XConnect\DockerExamples.XConnect.csproj /p:Configuration=$env:BUILD_CONFIGURATION /p:DeployOnBuild=True /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:PublishUrl=/out/xconnect
 
 # Publish the Rendering Host Artifacts
 WORKDIR .\src\Project\MvpSite\rendering\
@@ -43,6 +47,8 @@ FROM ${BASE_IMAGE}
 WORKDIR /artifacts
 
 # Copy in all artifacts for sitecore, identity & rendering host
-COPY --from=builder /build/docker/deploy/sitecore ./sitecore/
+COPY --from=builder /build/docker/deploy/sitecore ./website/
 COPY --from=builder /build/docker/deploy/identity/Config ./identity/Config
 COPY --from=builder /build/rendering ./rendering/
+#COPY --from=builder /out/transforms ./transforms/
+#COPY --from=builder /out/xconnect ./xconnect/

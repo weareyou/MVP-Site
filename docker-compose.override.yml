@@ -2,8 +2,8 @@ version: "2.4"
 services:
 
   dotnetsdk:
-    container_name: mvp-dotnetsdk
-    image: ${MVP_DOCKER_REGISTRY}mvp-dotnetsdk:${SITECORE_VERSION}
+    container_name: ${COMPOSE_PROJECT_NAME}-dotnetsdk
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-dotnetsdk:${SITECORE_VERSION}
     build:
       context: ./docker/build/dotnetsdk
       args:
@@ -11,30 +11,37 @@ services:
         NETCORE_BUILD_IMAGE: ${NETCORE_BUILD_IMAGE}
     scale: 0
 
-  solutionBuildOutput:
-    container_name: mvp-solution
-    image: ${MVP_DOCKER_REGISTRY}mvp-solution:${SITECORE_VERSION}
+  solution:
+    container_name: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
     build:
       context: ./
       dockerfile: ./docker/build/solution/Dockerfile
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
         BASE_IMAGE: ${SOLUTION_BASE_IMAGE}
-        BUILD_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-dotnetsdk:${SITECORE_VERSION}
+        BUILD_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-dotnetsdk:${SITECORE_VERSION}
     depends_on:
       - dotnetsdk
     scale: 0
 
-  mvp-rendering:
-    container_name: mvp-rendering
-    image: ${MVP_DOCKER_REGISTRY}mvp-rendering:${SITECORE_VERSION}
+  traefik:
+    volumes:
+      - ./docker/traefik:C:/etc/traefik
+    depends_on:
+      rendering:
+        condition: service_started
+  
+  rendering:
+    container_name: ${COMPOSE_PROJECT_NAME}-rendering
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-rendering:${VERSION:-latest}
     build:
       context: ./docker/build/rendering
       target: ${BUILD_CONFIGURATION}
       args:
-        DEBUG_BASE_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-dotnetsdk:${SITECORE_VERSION}
+        DEBUG_BASE_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-dotnetsdk:${SITECORE_VERSION}
         RELEASE_BASE_IMAGE: mcr.microsoft.com/dotnet/core/aspnet:3.1
-        SOLUTION_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-solution:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
     ports:
       - "8091:80"
     volumes:
@@ -46,7 +53,7 @@ services:
       Sitecore__RenderingHostUri: "https://${RENDERING_HOST}"
       Sitecore__EnableExperienceEditor: "true"
     depends_on:
-      - solutionBuildOutput
+      - solution
       - cm
     labels:
       - "traefik.enable=true"
@@ -58,62 +65,64 @@ services:
       interval: 60s
       timeout: 30s
 
-  traefik:
-    volumes:
-      - ./docker/traefik:C:/etc/traefik
-    depends_on:
-      mvp-rendering:
-        condition: service_started
-
+  redis:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-redis:${VERSION:-latest}
+    build:
+      context: ./docker/build/redis
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-redis:${SITECORE_VERSION}
+    
   mssql:
-    image: ${MVP_DOCKER_REGISTRY}mvp-mssql:${SITECORE_VERSION}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-mssql:${VERSION:-latest}
     build:
       context: ./docker/build/mssql
       args:
-        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}${SQL_IMAGE}:${SITECORE_VERSION}
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-mssql:${SITECORE_VERSION}
         JSS_RESOURCES_IMAGE: ${JSS_RESOURCES_IMAGE}
+        SPE_IMAGE: ${SITECORE_MODULE_REGISTRY}spe-assets:${SPE_VERSION}
+        SXA_IMAGE: ${SITECORE_MODULE_REGISTRY}sxa-xp1-assets:${SXA_VERSION}
     volumes:
-      - type: bind
-        source: .\docker\data\sql
-        target: c:\data
+      - ${LOCAL_DATA_PATH}\mssql:c:\data
   
   solr:
     volumes:            
       - ${LOCAL_DATA_PATH}\solr:c:\data  
    
   solr-init:
-    image: ${MVP_DOCKER_REGISTRY}mvp-solr-init:${SITECORE_VERSION}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-solr-init:${VERSION:-latest}
     build:
       context: ./docker/build/solr-init
       args:
-        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xm1-solr-init:${SITECORE_VERSION}                
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-solr-init:${SITECORE_VERSION}
+        SXA_IMAGE: ${SITECORE_MODULE_REGISTRY}sxa-xp1-assets:${SXA_VERSION}
   
   id:
-    image: ${MVP_DOCKER_REGISTRY}mvp-id:${SITECORE_VERSION}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-id:${VERSION:-latest}
     build:
       context: ./docker/build/id
       args:
-        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}${ID_IMAGE}:${SITECORE_VERSION}
-        SOLUTION_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-solution:${SITECORE_VERSION}
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-id:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
     environment:
       SITECORE_LICENSE_LOCATION: c:\license\license.xml
     volumes:
       - ${HOST_LICENSE_FOLDER}:c:\license
     depends_on:
-      - solutionBuildOutput
+      - solution
 
   cd:
-    image: ${MVP_DOCKER_REGISTRY}mvp-cd:${SITECORE_VERSION}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-cd:${VERSION:-latest}
     build:
       context: ./docker/build/cd
       args:
-        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}${CD_IMAGE}:${SITECORE_VERSION}
-        SOLUTION_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-solution:${SITECORE_VERSION}
-        TOOLS_RESOURCES_IMAGE: ${TOOLS_RESOURCES_IMAGE}
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-cd:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+
         JSS_RESOURCES_IMAGE: ${JSS_RESOURCES_IMAGE}
+        SXA_IMAGE: ${SITECORE_MODULE_REGISTRY}sxa-xp1-assets:${SXA_VERSION}
+        TOOLING_IMAGE: ${SITECORE_TOOLS_REGISTRY}sitecore-docker-tools-assets:${TOOLS_VERSION} ff checken     
     depends_on:
-      solutionBuildOutput:
-        condition: service_started
+      - solution
     volumes:
       - ${LOCAL_DEPLOY_PATH}\sitecore:C:\deploy
       - ${LOCAL_DATA_PATH}\cd:C:\inetpub\wwwroot\App_Data\logs
@@ -131,18 +140,19 @@ services:
       - "traefik.http.routers.cd-secure.middlewares=force-STS-Header"
 
   cm:
-    image: ${MVP_DOCKER_REGISTRY}mvp-cm:${SITECORE_VERSION}
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-cm:${VERSION:-latest}
     build:
       context: ./docker/build/cm
       args:
-        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}${CM_IMAGE}:${SITECORE_VERSION}
-        SOLUTION_IMAGE: ${MVP_DOCKER_REGISTRY}mvp-solution:${SITECORE_VERSION}
-        TOOLS_RESOURCES_IMAGE: ${TOOLS_RESOURCES_IMAGE}
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp-1-cm:${SITECORE_VERSION}
+        SPE_IMAGE: ${SITECORE_MODULE_REGISTRY}spe-assets:${SPE_VERSION}
+        SXA_IMAGE: ${SITECORE_MODULE_REGISTRY}sxa-xp1-assets:${SXA_VERSION}
+        TOOLING_IMAGE: ${SITECORE_TOOLS_REGISTRY}sitecore-docker-tools-assets:${TOOLS_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
         DEVEX_RESOURCES_IMAGE: ${DEVEX_RESOURCES_IMAGE}
         JSS_RESOURCES_IMAGE: ${JSS_RESOURCES_IMAGE}
     depends_on:
-      solutionBuildOutput:
-        condition: service_started
+      - solution
     volumes:
       - ${LOCAL_DEPLOY_PATH}\sitecore:C:\deploy
       - ${LOCAL_DATA_PATH}\cm:C:\inetpub\wwwroot\App_Data\logs
@@ -151,7 +161,105 @@ services:
       SITECORE_LICENSE_LOCATION: c:\license\license.xml
       SITECORE_DEVELOPMENT_PATCHES: CustomErrorsOff
     entrypoint: powershell.exe -Command "& C:\tools\entrypoints\iis\Development.ps1"
- 
+
+  prc:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-prc:${VERSION:-latest}
+    build:
+      context: ./docker/build/prc
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-prc:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  xdbcollection:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbcollection:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbcollection
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbcollection:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  xdbsearch:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbsearch:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbsearch
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbsearch:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  xdbautomation:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbautomation:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbautomation
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbautomation:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  xdbautomationrpt:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbautomationrpt:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbautomationrpt
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbautomationrpt:${SITECORE_VERSION}
+  
+  cortexprocessing:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-cortexprocessing:${VERSION:-latest}
+    build:
+      context: ./docker/build/cortexprocessing
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-cortexprocessing:${SITECORE_VERSION}
+  
+  cortexreporting:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-cortexreporting:${VERSION:-latest}
+    build:
+      context: ./docker/build/cortexreporting
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-cortexreporting:${SITECORE_VERSION}
+  
+  xdbrefdata:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbrefdata:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbrefdata
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbrefdata:${SITECORE_VERSION}
+  
+  xdbsearchworker:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbsearchworker:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbsearchworker
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbsearchworker:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  xdbautomationworker:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-xdbautomationworker:${VERSION:-latest}
+    build:
+      context: ./docker/build/xdbautomationworker
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-xdbautomationworker:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
+  cortexprocessingworker:
+    image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-xp1-cortexprocessingworker:${VERSION:-latest}
+    build:
+      context: ./docker/build/cortexprocessingworker
+      args:
+        BASE_IMAGE: ${SITECORE_DOCKER_REGISTRY}sitecore-xp1-cortexprocessingworker:${SITECORE_VERSION}
+        SOLUTION_IMAGE: ${REGISTRY}${COMPOSE_PROJECT_NAME}-solution:${VERSION:-latest}
+    depends_on:
+      - solution
+  
 networks:
   default:
     external:
