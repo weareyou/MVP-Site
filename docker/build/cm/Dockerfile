@@ -5,11 +5,12 @@ ARG SXA_IMAGE
 ARG SPE_IMAGE
 ARG TOOLING_IMAGE
 ARG SOLUTION_IMAGE
-
 ARG DEVEX_RESOURCES_IMAGE
 ARG JSS_RESOURCES_IMAGE
 
 FROM ${SOLUTION_IMAGE} as solution
+FROM ${SPE_IMAGE} as spe
+FROM ${SXA_IMAGE} as sxa
 FROM ${TOOLING_IMAGE} as tooling
 FROM ${DEVEX_RESOURCES_IMAGE} AS devex_resources
 FROM ${JSS_RESOURCES_IMAGE} AS jss_resources
@@ -44,13 +45,13 @@ RUN C:\module\tools\Initialize-Content.ps1 -TargetPath C:\inetpub\wwwroot; `
 COPY --from=solution \artifacts\website\ .\
 
 # Copy solution transforms
-COPY --from=solution \artifacts\transforms\ \transforms\solution\
+# COPY --from=solution \artifacts\transforms\ \transforms\solution\
 
 # Copy role transforms
-COPY .\transforms\ \transforms\role\
+# COPY .\transforms\ \transforms\role\
 
 # Perform solution transforms
-RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\solution\DockerExamples.Website
+# RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\solution\DockerExamples.Website
 
 # Perform role transforms
-RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\role
+# RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\role

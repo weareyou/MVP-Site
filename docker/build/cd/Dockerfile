@@ -15,7 +15,7 @@ FROM ${BASE_IMAGE}
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 # Copy development tools and entrypoint
-COPY --from=tooling \tools\ \tools\
+COPY --from=tooling C:\tools\ C:\tools\
 
 WORKDIR C:\inetpub\wwwroot
 
@@ -36,7 +36,7 @@ RUN C:\module\tools\Initialize-Content.ps1 -TargetPath C:\inetpub\wwwroot; `
 COPY --from=solution \artifacts\website\ .\
 
 # Copy solution transforms
-COPY --from=solution \artifacts\transforms\ \transforms\solution\
+#COPY --from=solution \artifacts\transforms\ \transforms\solution\
 
 # Perform solution transforms
-RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\solution\DockerExamples.Website
+#RUN C:\tools\scripts\Invoke-XdtTransform.ps1 -Path .\ -XdtPath C:\transforms\solution\DockerExamples.Website
