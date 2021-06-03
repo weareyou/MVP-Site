@@ -18,7 +18,7 @@ variables:
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
   AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azurecr.io'
-  MVP_DOCKER_REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
+  REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
 
   tag: "$(Build.BuildNumber)"
 
