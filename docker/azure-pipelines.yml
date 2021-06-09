@@ -28,6 +28,7 @@ variables:
   STAGING_CD_HOST: mvp-cd.sc.localhost
   STAGING_CM_HOST: mvp-cm.sc.localhost
   STAGING_ID_HOST: mvp-id.sc.localhost
+  STAGING_HOST: mvp.sc.localhost
 
 stages:
 - stage: Build
