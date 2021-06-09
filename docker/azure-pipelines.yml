@@ -19,7 +19,7 @@ variables:
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
   AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azurecr.io'
-  AKS_SERVICE_ENDPOINT: ''
+  AKS_SERVICE_ENDPOINT: 'Paas-to-AKS-Cluster'
   REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
   tag: "$(Build.BuildNumber)"
 
