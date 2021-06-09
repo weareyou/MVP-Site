@@ -21,8 +21,8 @@ variables:
   AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azurecr.io'
   AKS_SERVICE_ENDPOINT: 'Paas-to-AKS-Cluster'
   REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
-  tag: "$(Build.BuildNumber)"
-
+  #tag: "$(Build.BuildNumber)"
+  tag: '0.1.21'
   forcePush: true # can be set in pipeline variables later
 
 stages:
@@ -84,7 +84,7 @@ stages:
         artifact: 'Sitecore.MVP-$(Build.BuildNumber)' 
 
 - stage: Deploy
-  dependsOn: Build
+  #dependsOn: Build
   displayName: Deploy to Staging
   jobs:
   - deployment: 'Deploy_to_Staging_AKS'
@@ -108,7 +108,7 @@ stages:
               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
               command: 'apply'
               useConfigurationFile: true
-              configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/namespaces/namespace-staging.yaml'
+              configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/namespaces/namespace.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               outputFormat: ''
