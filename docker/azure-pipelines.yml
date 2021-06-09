@@ -184,7 +184,7 @@ stages:
               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
               namespace: 'mvp-staging'
               command: 'apply'
-              useConfigurationFile: true
+              useConfigurationFile: false
               configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/ingress-nginx'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
