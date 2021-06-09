@@ -108,7 +108,7 @@ stages:
               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
               command: 'apply'
               useConfigurationFile: true
-              configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/namespaces/namespace.yaml'
+              configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/namespace/namespace.yaml'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
               outputFormat: ''
