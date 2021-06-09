@@ -164,18 +164,18 @@ stages:
 
 # Contains the init's safe to run multiple times, doesn't override anything
 
-          - task: Kubernetes@1
-            displayName: Deploy Init Specifications
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
-              namespace: 'mvp-staging'
-              command: 'apply'
-              arguments: '-k ./'              
-              workingDirectory: '$(System.ArtifactsDirectory)/k8s-manifests/staging/init'
-              secretType: 'dockerRegistry'
-              containerRegistryType: 'Azure Container Registry'
-              outputFormat: ''
+          # - task: Kubernetes@1
+          #   displayName: Deploy Init Specifications
+          #   inputs:
+          #     connectionType: 'Kubernetes Service Connection'
+          #     kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
+          #     namespace: 'mvp-staging'
+          #     command: 'apply'
+          #     arguments: '-k ./'              
+          #     workingDirectory: '$(System.ArtifactsDirectory)/k8s-manifests/staging/init'
+          #     secretType: 'dockerRegistry'
+          #     containerRegistryType: 'Azure Container Registry'
+          #     outputFormat: ''
 
           - task: Kubernetes@1
             displayName: Deploy Ingress Specifications
