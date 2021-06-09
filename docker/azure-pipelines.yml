@@ -34,29 +34,29 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: DockerCompose@0
-      displayName: "Build Images"
-      inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
-        azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-        dockerComposeFile: '**/docker-compose.azdevops.yml'
-        qualifyImageNames: false
-        action: 'Build services'
-        additionalImageTags: '$(tag)'
-        includeLatestTag: true
+    # - task: DockerCompose@0
+    #   displayName: "Build Images"
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
+    #     azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+    #     dockerComposeFile: '**/docker-compose.azdevops.yml'
+    #     qualifyImageNames: false
+    #     action: 'Build services'
+    #     additionalImageTags: '$(tag)'
+    #     includeLatestTag: true
 
-    - task: DockerCompose@0
-      displayName: "Push Images with Latest Tag"
-      inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
-        azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-        dockerComposeFile: '**/docker-compose.azdevops.yml'
-        action: 'Push services'
-        additionalImageTags: '$(tag)'
-        includeLatestTag: true
-      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
+    # - task: DockerCompose@0
+    #   displayName: "Push Images with Latest Tag"
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
+    #     azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+    #     dockerComposeFile: '**/docker-compose.azdevops.yml'
+    #     action: 'Push services'
+    #     additionalImageTags: '$(tag)'
+    #     includeLatestTag: true
+    #   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
 
     - task: CopyFiles@2
       displayName: "Copy K8s specifications to staging directory"
@@ -84,7 +84,7 @@ stages:
         artifact: 'Sitecore.MVP-$(Build.BuildNumber)' 
 
 - stage: Deploy
-  #dependsOn: Build
+  dependsOn: Build
   displayName: Deploy to Staging
   jobs:
   - deployment: 'Deploy_to_Staging_AKS'
