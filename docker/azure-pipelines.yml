@@ -171,7 +171,8 @@ stages:
               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
               namespace: 'mvp-staging'
               command: 'apply'
-              useConfigurationFile: false
+              arguments: '-f'              
+              useConfigurationFile: true
               configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/init'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
@@ -184,7 +185,8 @@ stages:
               kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
               namespace: 'mvp-staging'
               command: 'apply'
-              useConfigurationFile: false
+              arguments: '-f'              
+              useConfigurationFile: true
               configuration: '$(System.ArtifactsDirectory)/k8s-manifests/staging/ingress-nginx'
               secretType: 'dockerRegistry'
               containerRegistryType: 'Azure Container Registry'
