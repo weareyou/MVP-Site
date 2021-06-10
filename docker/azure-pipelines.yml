@@ -195,6 +195,19 @@ stages:
               containerRegistryType: 'Azure Container Registry'
               outputFormat: ''              
 
+          - task: Kubernetes@1
+            displayName: Deploy Volume Specifications
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: '$(AKS_SERVICE_ENDPOINT)'
+              namespace: 'mvp-staging'
+              command: 'apply'
+              arguments: '-f ./'              
+              workingDirectory: '$(System.ArtifactsDirectory)/k8s-manifests/staging/volumes/azurefile'
+              secretType: 'dockerRegistry'
+              containerRegistryType: 'Azure Container Registry'
+              outputFormat: '' 
+
 ## Update the image versions in the kustomization file
 
           - task: Bash@3
