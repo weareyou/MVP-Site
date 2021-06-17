@@ -33,6 +33,19 @@ if (!$notPresent) {
     New-AzResourceGroup -Name $resourceGroupName -Location $location;
 }
 
+$SolrExists = Get-AzResourceGroupDeployment -resourceGroupName $resourceGroupName -Name "SOLR" -ErrorAction SilentlyContinue
+
+if (!$SolrExists){
+
+    Write-Host "Solr Doesn't exist yet, deploying"
+}else{
+
+    Write-Host "Solr Exists, exiting"
+    exit 0
+
+}
+
+
 # upload scripts & templates
 $optionalParameters = New-Object -TypeName Hashtable
 Set-Variable ArtifactsLocationName '_artifactsLocation' -Option ReadOnly -Force
