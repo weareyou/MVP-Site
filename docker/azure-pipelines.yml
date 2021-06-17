@@ -18,11 +18,10 @@ variables:
   # Agent VM image name
   vmImageName: 'windows-latest'
   AZURE_SUBSCRIPTION: 'WAY Azure Internal 2.0'
-  AZURE_CONTAINER_REGISTRY: 'paastoaksacr.azurecr.io'
-  AKS_SERVICE_ENDPOINT: 'Paas-to-AKS-Cluster'
+  AZURE_CONTAINER_REGISTRY: 'waysc10aksacr.azurecr.io'
+  AKS_SERVICE_ENDPOINT: 'way-sc10-aks-cluster'
   REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
-  #tag: "$(Build.BuildNumber)"
-  tag: '0.1.21'
+  tag: "$(Build.BuildNumber)"
   forcePush: true # can be set in pipeline variables later
 
   STAGING_CD_HOST: mvp-cd.sc.localhost
@@ -39,29 +38,29 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    # - task: DockerCompose@0
-    #   displayName: "Build Images"
-    #   inputs:
-    #     containerregistrytype: 'Azure Container Registry'
-    #     azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
-    #     azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-    #     dockerComposeFile: '**/docker-compose.azdevops.yml'
-    #     qualifyImageNames: false
-    #     action: 'Build services'
-    #     additionalImageTags: '$(tag)'
-    #     includeLatestTag: true
+    - task: DockerCompose@0
+      displayName: "Build Images"
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
+        azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+        dockerComposeFile: '**/docker-compose.azdevops.yml'
+        qualifyImageNames: false
+        action: 'Build services'
+        additionalImageTags: '$(tag)'
+        includeLatestTag: true
 
-    # - task: DockerCompose@0
-    #   displayName: "Push Images with Latest Tag"
-    #   inputs:
-    #     containerregistrytype: 'Azure Container Registry'
-    #     azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
-    #     azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-    #     dockerComposeFile: '**/docker-compose.azdevops.yml'
-    #     action: 'Push services'
-    #     additionalImageTags: '$(tag)'
-    #     includeLatestTag: true
-    #   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
+    - task: DockerCompose@0
+      displayName: "Push Images with Latest Tag"
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscriptionEndpoint: '$(AZURE_SUBSCRIPTION)'       
+        azureContainerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+        dockerComposeFile: '**/docker-compose.azdevops.yml'
+        action: 'Push services'
+        additionalImageTags: '$(tag)'
+        includeLatestTag: true
+      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['forcePush'], 'true')))
 
     - task: CopyFiles@2
       displayName: "Copy K8s specifications to staging directory"
@@ -167,6 +166,7 @@ stages:
           #     containerRegistryType: 'Azure Container Registry'
           #     outputFormat: ''
 
+# Already exists in the init pipeline
 # Contains the init's safe to run multiple times, doesn't override anything
 # Fails because already exists
 
