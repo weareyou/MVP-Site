@@ -9,10 +9,10 @@
       "value": "8.4.0"
     },
     "vnetRG": {
-      "value": "paas-to-aks"
+      "value": "way-sc10-aks"
     },
     "vnetName": {
-      "value": "paas-to-aks-vnet"
+      "value": "way-sc10-aks-vnet"
     },
     "subnetName": {
       "value": "solr-subnet"
