@@ -110,6 +110,11 @@ spec:
             secretKeyRef:
               name: sitecore-license
               key: sitecore-license.txt
+        - name: Sitecore_Redis_Connection_String
+          valueFrom:
+            secretKeyRef:
+              name: sitecore-redis
+              key: sitecore-redis-connection-string.txt              
         - name: Sitecore_ConnectionStrings_Security
           value: Data Source=$(Database_Server);Initial Catalog=Sitecore.Core;User ID=$(Core_Database_Username);Password=$(Core_Database_Password);
         - name: Sitecore_ConnectionStrings_Web
@@ -134,7 +139,7 @@ spec:
         - name: Sitecore_ConnectionStrings_Xdb.ReferenceData.Client
           value: http://xdbrefdata
         - name: Sitecore_ConnectionStrings_Redis.Sessions
-          value: redis:6379,ssl=False,abortConnect=False
+          value: $(Sitecore_Redis_Connection_String)
         - name: SOLR_CORE_PREFIX_NAME
           valueFrom:
             secretKeyRef:

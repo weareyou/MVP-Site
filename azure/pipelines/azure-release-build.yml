@@ -1,0 +1,28 @@
+name: $(Date:dd.MM.yyyy)$(rev:.r)
+trigger: 
+  branches:
+    include:
+    - main
+  paths:
+    include:
+      - azure
+      - sitecore
+
+pr: none
+
+jobs:
+  - job: Azure
+    displayName: ☁ Azure
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - task: PublishPipelineArtifact@1
+        displayName: 🚢 Publish Azure Artifact
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/azure'
+          artifactName: Azure
+      - task: PublishPipelineArtifact@1
+        displayName: 🚢 Publish Kubernetes Artifact
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/sitecore/k8s'
+          artifactName: Kubernetes
