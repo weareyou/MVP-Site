@@ -98,14 +98,14 @@ stages:
                 ScriptArguments: '-resourceGroupName "$(resourceGroupName)"'
                 azurePowerShellVersion: LatestVersion
 
-            - task: AzurePowerShell@5
-              displayName: 'Update Redis connection string in KeyVault'
+            - task: AzureCLI@2
               inputs:
                 azureSubscription: '$(azureServiceConnection)'
-                ScriptPath: '$(Pipeline.Workspace)/Azure/scripts/update-redis-akv-secret.ps1'
-                ScriptArguments: '-resourceGroupName "$(resourceGroupName)" -redisCacheName "$(redisCacheName)" -vaultName "$(keyvaultName)"'
-                azurePowerShellVersion: LatestVersion                
-
+                scriptType: 'ps'
+                scriptLocation: 'scriptPath'
+                scriptPath: '$(Pipeline.Workspace)/Azure/scripts/update-redis-akv-secret.ps1'
+                arguments: '-resourceGroupName "$(resourceGroupName)" -redisCacheName "$(redisCacheName)" -vaultName "$(keyvaultName)"'
+                azurePowerShellVersion: LatestVersion
 
     - deployment: DeploySecrets
       dependsOn: DeployEDS
@@ -203,7 +203,7 @@ stages:
                 connectionType: 'Kubernetes Service Connection'
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
                 command: 'wait'
-                arguments: '--for=condition=Complete job.batch/solr-init --timeout=600s'
+                arguments: '--for=condition=Complete job.batch/solr-init --timeout=600s -n $(namespace)'
                 outputFormat: none
 
             - task: Kubernetes@1
@@ -212,7 +212,7 @@ stages:
                 connectionType: 'Kubernetes Service Connection'
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
                 command: 'wait'
-                arguments: '--for=condition=Complete job.batch/mssql-init --timeout=600s'                         
+                arguments: '--for=condition=Complete job.batch/mssql-init --timeout=600s -n $(namespace)'                         
                 outputFormat: none
 
     # - deployment: SitecorePods
