@@ -24,7 +24,7 @@ Write-Host "--- Creating nginx (Ingress) ---" -ForegroundColor Cyan
 
 #Create namespace
 
-kubectl create namespace $namespace
+kubectl create namespace $namespace --dry-run=client -o yaml | kubectl apply -f -
 
 # add nginx helm charts
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
