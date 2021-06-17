@@ -67,7 +67,7 @@ stages:
                 resourceGroupName: '$(resourceGroupName)'
                 location: '$(location)'
                 csmFile: '$(Pipeline.Workspace)/Azure/templates/sql/deploy-sql.json'
-                csmParametersFile: '$(Pipeline.Workspace)/Azure/templates/sql/deploy-sql.parameters-temp.json'
+                csmParametersFile: '$(Pipeline.Workspace)/Azure/templates/sql/deploy-sql.parameters.json'
                 overrideParameters: '-deploymentId "$(deploymentId)"'
                 deploymentName: SQL
 
