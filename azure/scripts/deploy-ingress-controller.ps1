@@ -5,7 +5,11 @@
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string] $AksName
+    [string] $AksName,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [string] $namespace 
 )
 
 # authenticate AKS instance
@@ -36,6 +40,6 @@ helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx `
     --set-string controller.config.proxy-body-size=10m `
     --set controller.service.externalTrafficPolicy=Local `
     --wait `
-    --namespace ingress-nginx
+    --namespace $namespace
 
 Write-Host "--- Ready setting up nginx, now retrieving DNS data... ---" -ForegroundColor Green

@@ -24,7 +24,7 @@ stages:
           inputs:
             targetPath: '$(System.DefaultWorkingDirectory)/k8s/manifests/staging'
             artifactName: Kubernetes
-
+  
     - deployment: DeployEDS
       displayName: Deploy external data services
       dependsOn: Build
@@ -143,7 +143,7 @@ stages:
               inputs:
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
                 command: apply
-                arguments: '-k $(Pipeline.Workspace)/Kubernetes/secrets/'
+                arguments: '-n $(namespace) -k $(Pipeline.Workspace)/Kubernetes/secrets/'
                 outputFormat: none
 
     - deployment: DeployIngressController
@@ -166,7 +166,7 @@ stages:
                 scriptType: 'ps'
                 scriptLocation: 'scriptPath'
                 scriptPath: '$(Pipeline.Workspace)/Azure/scripts/deploy-ingress-controller.ps1'
-                arguments: '-resourceGroupName "$(resourceGroupName)" -aksName "$(aksName)"'
+                arguments: '-resourceGroupName "$(resourceGroupName)" -aksName "$(aksName)" -namespace $(namespaceIngress) '
                   
     - deployment: InitJobs
       dependsOn: DeployIngressController
@@ -181,17 +181,13 @@ stages:
             - download: current
               artifact: Kubernetes
 
-            - task: KubernetesManifest@0
-              displayName: 'Run SOLR Initialization'
+            - task: Kubernetes@1
+              displayName: 'Run SOLR and SQL Initialization'
               inputs:
-                kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-                manifests: '$(Pipeline.Workspace)/Kubernetes/init/solr-init.yaml'
-
-            - task: KubernetesManifest@0
-              displayName: 'Run MSSQL Initialization'
-              inputs:
-                kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-                manifests: '$(Pipeline.Workspace)/Kubernetes/init/mssql-init.yaml'
+                kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
+                command: apply
+                arguments: '-n $(namespace) -k $(Pipeline.Workspace)/Kubernetes/init/'
+                outputFormat: none                
 
             - task: Kubernetes@1
               displayName: 'Wait for SOLR Initialization to finish'            
