@@ -139,6 +139,14 @@ stages:
                 tokenSuffix: ')'
 
             - task: Kubernetes@1
+              displayName: 'Create Namespace'
+              inputs:
+                kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
+                command: create
+                arguments: 'namespace $(namespace)'
+                outputFormat: none                
+
+            - task: Kubernetes@1
               displayName: 'Deploy Secrets'
               inputs:
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
