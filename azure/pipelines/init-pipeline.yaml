@@ -99,6 +99,7 @@ stages:
                 azurePowerShellVersion: LatestVersion
 
             - task: AzureCLI@2
+              displayName: 'Update Redis connection string in KeyVault'
               inputs:
                 azureSubscription: '$(azureServiceConnection)'
                 scriptType: 'ps'
@@ -139,12 +140,18 @@ stages:
                 tokenSuffix: ')'
 
             - task: Kubernetes@1
-              displayName: 'Create Namespace'
+              displayName: 'create namespace'
               inputs:
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
-                command: create
-                arguments: 'namespace $(namespace) --dry-run=client -o yaml | kubectl apply -f -'
-                outputFormat: none                
+                command: 'apply'
+                useConfigurationFile: true
+                configurationType: 'inline'
+                inline: |
+                  apiVersion: v1
+                  kind: Namespace
+                  metadata:
+                    name: $(namespace)
+                outputFormat: 'none'
 
             - task: Kubernetes@1
               displayName: 'Deploy Secrets'
