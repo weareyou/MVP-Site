@@ -18,6 +18,10 @@ az aks get-credentials --admin `
 
 Write-Host "--- Creating nginx (Ingress) ---" -ForegroundColor Cyan
 
+#Create namespace
+
+kubectl create namespace ingress-nginx
+
 # add nginx helm charts
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 
@@ -31,6 +35,7 @@ helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx `
     --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux `
     --set-string controller.config.proxy-body-size=10m `
     --set controller.service.externalTrafficPolicy=Local `
-    --wait
+    --wait `
+    --namespace ingress-nginx
 
 Write-Host "--- Ready setting up nginx, now retrieving DNS data... ---" -ForegroundColor Green

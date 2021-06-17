@@ -22,7 +22,7 @@ stages:
         - task: PublishPipelineArtifact@1
           displayName: 🚢 Publish Kubernetes Artifact
           inputs:
-            targetPath: '$(System.DefaultWorkingDirectory)/sitecore/k8s'
+            targetPath: '$(System.DefaultWorkingDirectory)/k8s/manifests/staging'
             artifactName: Kubernetes
 
     - deployment: DeployEDS
@@ -129,7 +129,7 @@ stages:
             - task: replacetokens@3
               displayName: 'Replace Tokens in Secrets'
               inputs:
-                rootDirectory: '$(Pipeline.Workspace)/Kubernetes/$(topology)'
+                rootDirectory: '$(Pipeline.Workspace)/Kubernetes'
                 targetFiles: |
                  **/*.txt
                  **/*.crt
@@ -143,7 +143,7 @@ stages:
               inputs:
                 kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
                 command: apply
-                arguments: '-k $(Pipeline.Workspace)/Kubernetes/$(topology)/secrets/'
+                arguments: '-k $(Pipeline.Workspace)/Kubernetes/secrets/'
                 outputFormat: none
 
     - deployment: DeployIngressController
@@ -185,13 +185,13 @@ stages:
               displayName: 'Run SOLR Initialization'
               inputs:
                 kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-                manifests: '$(Pipeline.Workspace)/Kubernetes/$(topology)/init/solr-init.yaml'
+                manifests: '$(Pipeline.Workspace)/Kubernetes/init/solr-init.yaml'
 
             - task: KubernetesManifest@0
               displayName: 'Run MSSQL Initialization'
               inputs:
                 kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-                manifests: '$(Pipeline.Workspace)/Kubernetes/$(topology)/init/mssql-init.yaml'
+                manifests: '$(Pipeline.Workspace)/Kubernetes/init/mssql-init.yaml'
 
             - task: Kubernetes@1
               displayName: 'Wait for SOLR Initialization to finish'            
@@ -228,13 +228,13 @@ stages:
     #           displayName: 'Deploy Sitecore Pods'
     #           inputs:
     #             kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-    #             manifests: '$(Pipeline.Workspace)/Kubernetes/$(topology)/*.yaml'
+    #             manifests: '$(Pipeline.Workspace)/Kubernetes/*.yaml'
 
     #         - task: KubernetesManifest@0
     #           displayName: 'Deploy Ingress'
     #           inputs:
     #             kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-    #             manifests: '$(Pipeline.Workspace)/Kubernetes/$(topology)/ingress-nginx/ingress.yaml'
+    #             manifests: '$(Pipeline.Workspace)/Kubernetes/ingress-nginx/ingress.yaml'
 
     #         - task: Kubernetes@1
     #           displayName: 'Wait for all jobs to finish'
