@@ -21,6 +21,7 @@ variables:
   AZURE_CONTAINER_REGISTRY: 'waysc10aksacr.azurecr.io'
   AKS_SERVICE_ENDPOINT: 'way-sc10-aks-cluster'
   REGISTRY: $(AZURE_CONTAINER_REGISTRY)/
+  keyvaultName: "way-sc10-aks-keyvault"
   #tag: "$(Build.BuildNumber)"
   tag: "0.1.35"
   forcePush: true # can be set in pipeline variables later
@@ -109,7 +110,7 @@ stages:
           - task: AzureKeyVault@1
             displayName: 'Azure Key Vault: $(keyvaultName)'
             inputs:
-              azureSubscription: '$(azureServiceConnection)'
+              azureSubscription: '$(AZURE_SUBSCRIPTION)'
               KeyVaultName: $(keyvaultName)
 
           - task: Kubernetes@1
