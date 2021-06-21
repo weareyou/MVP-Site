@@ -18,21 +18,21 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: mvp-cd
+          serviceName: cd
           servicePort: 80
   - host: $(STAGING_CM_HOST)
     http:
       paths:
       - path: /
         backend:
-          serviceName: mvp-cm
+          serviceName: cm
           servicePort: 80
   - host: $(STAGING_ID_HOST)
     http:
       paths:
       - path: /
         backend:
-          serviceName: mvp-id
+          serviceName: id
           servicePort: 80
   - host: $(STAGING_HOST)
     http:
