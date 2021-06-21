@@ -33,7 +33,8 @@ if (!$notPresent) {
     New-AzResourceGroup -Name $resourceGroupName -Location $location;
 }
 
-$SolrExists = Get-AzResourceGroupDeployment -resourceGroupName $resourceGroupName -Name "SOLR" -ErrorAction SilentlyContinue
+$getSolrDeploy = Get-AzResourceGroupDeployment -resourceGroupName $resourceGroupName -Name "SOLR" -ErrorAction SilentlyContinue
+$SolrExists = get-AzVM -resourceGroupName $resourceGroupName -name  $getSolrDeploy.Outputs.serverName.Value -ErrorAction SilentlyContinue
 
 if (!$SolrExists){
 
