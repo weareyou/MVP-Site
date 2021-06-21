@@ -26,10 +26,10 @@ variables:
   tag: "0.1.35"
   forcePush: true # can be set in pipeline variables later
 
-  STAGING_CD_HOST: mvp-cd.sc.localhost
-  STAGING_CM_HOST: mvp-cm.sc.localhost
-  STAGING_ID_HOST: mvp-id.sc.localhost
-  STAGING_HOST: mvp.sc.localhost
+  STAGING_CD_HOST: mvp-cd.sc.global
+  STAGING_CM_HOST: mvp-cm.sc.global
+  STAGING_ID_HOST: mvp-id.sc.global
+  STAGING_HOST: mvp.sc.global
 
 stages:
 - stage: Build
