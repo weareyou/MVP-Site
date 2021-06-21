@@ -58,8 +58,8 @@ packagelist=(
 				'wget'
 				'unzip'
 				'lsof'
-				'java-1.8.0-openjdk'
-				'java-1.8.0-openjdk-devel'
+				'java-11-openjdk-devel'
+				'java-11-openjdk'
                 'powershell'
 			)
 
@@ -90,10 +90,14 @@ echo $solrPassword | passwd solr --stdin
 # Install and configure zookeeper
 cd /tmp
 
-wget https://ftp.nluug.nl/internet/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz -q
+zookeeperVersion=$(curl -s https://ftp.nluug.nl/internet/apache/zookeeper/stable/ --list-only | grep bin.tar.gz | grep -o 'href=".*">' | sed 's/href="apache-zookeeper-//;s/-bin.tar.gz">//')
 
-tar -xvf apache-zookeeper-3.6.2-bin.tar.gz -C /opt
-ln -s /opt/apache-zookeeper-3.6.2-bin /opt/zookeeper
+echo $zookeeperVersion
+
+wget https://ftp.nluug.nl/internet/apache/zookeeper/stable/apache-zookeeper-$zookeeperVersion-bin.tar.gz -q
+
+tar -xvf apache-zookeeper-$zookeeperVersion-bin.tar.gz -C /opt
+ln -s /opt/apache-zookeeper-$zookeeperVersion-bin /opt/zookeeper
 
 cat <<EOT >> /opt/zookeeper/conf/zoo.cfg
 tickTime=2000
@@ -123,7 +127,7 @@ SERVER_JVMFLAGS="-Xms2048m -Xmx2048m -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGC
 EOT
 
 chown -R solr:solr /opt/zookeeper
-chown -R solr:solr /opt/apache-zookeeper-3.6.2-bin
+chown -R solr:solr /opt/apache-zookeeper-$zookeeperVersion-bin
 
 cat <<EOT >> /etc/systemd/system/zookeeper.service
 [Unit]
